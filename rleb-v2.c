@@ -180,7 +180,7 @@ void decompress(char* in_path)
 	{
 		int start = 0;
 
-		// complete incomplete last pair from previous turn
+		// complete the incomplete last pair from previous turn
 		if (last_count != 0)
 		{
 			unsigned char count = last_count;
