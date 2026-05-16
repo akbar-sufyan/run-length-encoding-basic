@@ -1,0 +1,95 @@
+# Compiled binaries
+rleb-v1
+rleb-v2
+*.o
+*.a
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Build directories
+build/
+dist/
+bin/
+obj/
+
+# Test outputs and temporary files
+*.rleb
+test_output*
+*.tmp
+temp/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+*.sublime-project
+*.sublime-workspace
+
+# Compiler output
+*.d
+*.depend
+*.depend.txt
+
+# Dependency files
+*.deplist
+
+# Debugging
+*.dSYM/
+*.su
+*.gch
+*.pcm
+
+# CMake
+CMakeFiles/
+cmake_build_debug/
+cmake_build_release/
+CMakeCache.txt
+CMakeUserPresets.json
+
+# Clang
+.clang
+compile_commands.json
+
+# GDB
+.gdbinit
+.gdb_history
+
+# Valgrind
+.valgrind_suppression
+vgcore.*
+
+# Test coverage
+*.gcov
+*.gcda
+*.gcno
+coverage/
+lcov_html/
+
+# OS-specific
+.Thumbs.db
+.directory
+ehthumbs.db
+
+# Log files
+*.log
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.7z
+
+# Backup files
+*.bak
+*.backup
+*.orig
+
+# System files
+.DS_Store
+Thumbs.db
