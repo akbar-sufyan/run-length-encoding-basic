@@ -57,14 +57,14 @@ void compress(char* in_path)
 	fputc('\n', out_file);
 
 	// run-length-encoding
-	char IN_CHUNK[CHUNK_SIZE] = {};
-	char OUT_CHUNK[CHUNK_SIZE] = {};
+	unsigned char IN_CHUNK[CHUNK_SIZE] = {};
+	unsigned char OUT_CHUNK[CHUNK_SIZE] = {};
 	int out_chunk_index = 0;
 
 	int bytes_read = 0;
 	while ((bytes_read = fread(IN_CHUNK, 1, CHUNK_SIZE, in_file)) > 0)
 	{
-		for (int next = 1, seen = 0, count = 1 ; next < bytes_read ; next++)
+		for (unsigned char next = 1, seen = 0, count = 1 ; next <= bytes_read ; next++)
 		{
 			if (IN_CHUNK[next] == IN_CHUNK[seen] && count < 255)
 			{
@@ -83,6 +83,11 @@ void compress(char* in_path)
 				}
 			}
 		}
+	}
+	if (out_chunk_index != 0)
+	{
+		fwrite(OUT_CHUNK, 1, out_chunk_index, out_file);
+		out_chunk_index = 0;
 	}
 	fflush(out_file);
 	printf("%s encoded as %s\n", in_path, out_path);
@@ -166,24 +171,65 @@ void decompress(char* in_path)
 	}
 
 	// run-length-decoding
-	while (1)
+	unsigned char IN_CHUNK[CHUNK_SIZE] = {};
+	unsigned char OUT_CHUNK[CHUNK_SIZE] = {};
+	int bytes_read = 0;
+	int out_chunk_index = 0;
+	unsigned char last_count = 0;
+	while ((bytes_read = fread(IN_CHUNK, 1, CHUNK_SIZE, in_file)) > 0)
 	{
-		int count = fgetc(in_file);
-		if (count == EOF)
+		int start = 0;
+
+		// complete incomplete last pair from previous turn
+		if (last_count != 0)
 		{
-			break;
-		}
-		int seen = fgetc(in_file);
-		if (seen == EOF)
-		{
-			break;
+			unsigned char count = last_count;
+			unsigned char seen = IN_CHUNK[0];
+
+			if (out_chunk_index + count >= CHUNK_SIZE)
+			{
+				fwrite(OUT_CHUNK, 1, out_chunk_index, out_file);
+				out_chunk_index = 0;
+			}
+ 
+			memset(OUT_CHUNK + out_chunk_index, seen, count);
+			out_chunk_index += count;
+
+			start = 1;
 		}
 
-		for (int i = 0 ; i < count ; i++)
+		// decode each pair
+		for (int i = start ; i + 1 < bytes_read ; i += 2)
+		{	
+			int count = IN_CHUNK[i];
+			char seen = IN_CHUNK[i + 1];
+
+			if (out_chunk_index + count >= CHUNK_SIZE)
+			{
+				fwrite(OUT_CHUNK, 1, out_chunk_index, out_file);
+				out_chunk_index = 0;
+			}
+ 
+			memset(OUT_CHUNK + out_chunk_index, seen, count);
+			out_chunk_index += count;
+		}
+
+		// last pair is incomplete
+		if (bytes_read % 2)
 		{
-			fputc(seen, out_file);
+			last_count = IN_CHUNK[bytes_read - 1];
+		}
+		// last pair is complete
+		else
+		{
+			last_count = 0;
 		}
 	}
+	if (out_chunk_index != 0)
+	{
+		fwrite(OUT_CHUNK, 1, out_chunk_index, out_file);
+	}
+
 	printf("%s decoded as %s\n", in_path, out_path);
 	free(out_path);
 	free(in_header);
